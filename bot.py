@@ -5,9 +5,19 @@ from datetime import datetime
 from fastapi import FastAPI, Request, HTTPException
 from pydantic import BaseModel
 from typing import Any, Optional, Dict, List
+from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 START = time.time()
 
 # Configure your Gemini API key (Ensure this is set in your environment before running, or replace locally)
@@ -23,6 +33,10 @@ except Exception:
 # In-memory stores
 contexts: Dict[tuple[str, str], dict] = {}    # (scope, context_id) -> {version, payload}
 conversations: Dict[str, list] = {}           # conversation_id -> [turns]
+
+@app.get("/")
+def read_root():
+    return {"status": "ok", "message": "Magicpin AI Bot is running!"}
 
 @app.get("/v1/healthz")
 async def healthz():
